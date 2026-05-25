@@ -1,6 +1,6 @@
 # Tugas-3_Kelompok-1_Weight-Balanced-AVL-Tree
 | Nama Anggota | NRP |
-| :---: | :---: |
+| :--- | :---: |
 | Putri Permata Sabila | 5027251047 |
 | Revalinda Bunga Nayla Laksono | 5027251011 |
 | Nathania Tiara Wahyudi | 5027251089 |
