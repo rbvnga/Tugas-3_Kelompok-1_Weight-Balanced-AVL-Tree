@@ -1,4 +1,3 @@
-import java.util.*;
 
 class Node {
    int key, height;
@@ -22,6 +21,12 @@ public class AVLTree {
    int max(int a, int b) {
       return (a > b) ? a : b;
    }
+
+   int size (Node n) {
+   if (n == null)
+      return 0;
+   return 1 + size (n.left) + size (n.right);
+}
 
    Node rightRotate(Node y) {
       rotationCount++;
@@ -145,9 +150,10 @@ public class AVLTree {
       int N = 1000;
 
       int[] data = new int[N];
-      Random rand = new Random(42);
-      for (int i = 0; i < N; i++)
-         data[i] = rand.nextInt(10000);
+      for (int i = 0; i < N; i++){
+         data[i] = i + 1;
+      }
+      
 
       // benchmark insert
       long start = System.nanoTime();
@@ -160,6 +166,7 @@ public class AVLTree {
       System.out.println("Waktu : " + (end - start) / 1_000_000.0 + " ms");
       System.out.println("Rotasi: " + tree.rotationCount);
       System.out.println("Tinggi: " + tree.height(tree.root));
+      System.out.println ("Size  : " + tree.size (tree.root));
 
       // benchmark search
       start = System.nanoTime();
@@ -181,10 +188,11 @@ public class AVLTree {
       System.out.println("Waktu : " + (end - start) / 1_000_000.0 + " ms");
       System.out.println("Rotasi: " + tree.rotationCount);
       System.out.println("Tinggi: " + tree.height(tree.root));
+      System.out.println ("Size  : " + tree.size (tree.root));
 
       // print hasil akhir tree
-      System.out.print("\nAVL Tree: ");
-      tree.printTree(tree.root);
-      System.out.println();
+      // System.out.print("\nAVL Tree: ");
+      // tree.printTree(tree.root);
+      // System.out.println();
    }
 }

@@ -1,4 +1,4 @@
-import java.util.*;
+import java.util.Random;
 
 class WBTNode {
    int key, size;
@@ -37,6 +37,12 @@ public class WeightBalancedAVLTree {
       return (size(a) + 1) < GAMMA * (size(b) + 1);
    }
 
+   int height (WBTNode n) {
+   if (n == null)
+      return 0;
+   return 1 + Math.max (height (n.left), height (n.right));
+}  
+
    WBTNode rotateRight(WBTNode y) {
       rotationCount++;
       WBTNode x = y.left;
@@ -60,87 +66,39 @@ public class WeightBalancedAVLTree {
    }
 
    // single/double rotation mengikuti paper
-   WBTNode balanceLeft(int key, WBTNode l, WBTNode r) {
-      if (!isBalanced(l, r)) {
-         // perlu rotasi kiri
-         if (isSingle(r.left, r.right)) {
-            // single left rotation
-            WBTNode newLeft = new WBTNode(key);
-            newLeft.left = l;
-            newLeft.right = r.left;
-            updateSize(newLeft);
-            WBTNode result = new WBTNode(r.key);
-            result.left = newLeft;
-            result.right = r.right;
-            updateSize(result);
-            rotationCount++;
-            return result;
-         } else {
-            // double left rotation
-            WBTNode rl = r.left;
-            WBTNode newLeft = new WBTNode(key);
-            newLeft.left = l;
-            newLeft.right = rl.left;
-            updateSize(newLeft);
-            WBTNode newRight = new WBTNode(r.key);
-            newRight.left = rl.right;
-            newRight.right = r.right;
-            updateSize(newRight);
-            WBTNode result = new WBTNode(rl.key);
-            result.left = newLeft;
-            result.right = newRight;
-            updateSize(result);
-            rotationCount++;
-            return result;
-         }
+   WBTNode balanceLeft (int key, WBTNode l, WBTNode r) {
+   WBTNode node = new WBTNode (key);
+   node.left = l;
+   node.right = r;
+   updateSize (node);
+   if (!isBalanced (l, r)) {
+      if (isSingle (r.left, r.right))
+         return rotateLeft (node);
+      else {
+         node.right = rotateRight (r);
+         updateSize (node);
+         return rotateLeft (node);
       }
-      WBTNode node = new WBTNode(key);
-      node.left = l;
-      node.right = r;
-      updateSize(node);
-      return node;
    }
+   return node;
+}
 
-   WBTNode balanceRight(int key, WBTNode l, WBTNode r) {
-      if (!isBalanced(r, l)) {
-         // perlu rotasi kanan
-         if (isSingle(l.right, l.left)) {
-            // single right rotation
-            WBTNode newRight = new WBTNode(key);
-            newRight.left = l.right;
-            newRight.right = r;
-            updateSize(newRight);
-            WBTNode result = new WBTNode(l.key);
-            result.left = l.left;
-            result.right = newRight;
-            updateSize(result);
-            rotationCount++;
-            return result;
-         } else {
-            // double right rotation
-            WBTNode lr = l.right;
-            WBTNode newLeft = new WBTNode(l.key);
-            newLeft.left = l.left;
-            newLeft.right = lr.left;
-            updateSize(newLeft);
-            WBTNode newRight = new WBTNode(key);
-            newRight.left = lr.right;
-            newRight.right = r;
-            updateSize(newRight);
-            WBTNode result = new WBTNode(lr.key);
-            result.left = newLeft;
-            result.right = newRight;
-            updateSize(result);
-            rotationCount++;
-            return result;
-         }
+WBTNode balanceRight (int key, WBTNode l, WBTNode r) {
+   WBTNode node = new WBTNode (key);
+   node.left = l;
+   node.right = r;
+   updateSize (node);
+   if (!isBalanced (r, l)) {
+      if (isSingle (l.right, l.left))
+         return rotateRight (node);
+      else {
+         node.left = rotateLeft (l);
+         updateSize (node);
+         return rotateRight (node);
       }
-      WBTNode node = new WBTNode(key);
-      node.left = l;
-      node.right = r;
-      updateSize(node);
-      return node;
    }
+   return node;
+}
 
    WBTNode insert(WBTNode node, int key) {
       if (node == null)
@@ -200,29 +158,37 @@ public class WeightBalancedAVLTree {
    public static void main(String args[]) {
      
       WeightBalancedAVLTree tree = new WeightBalancedAVLTree();
-      int N = 10;
+      int N = 1000;
 
       int[] data = new int[N];
-      Random rand = new Random(42);
-      for (int i = 0; i < N; i++)
-         data[i] = rand.nextInt(10000);
-
+      Random rand = new Random (42);
+      for (int i = 0; i < N; i++){
+         data[i] = rand.nextInt (10000);
+      }
+      
+      // for (int i = 0; i < N; i++){
+      //    data[i] = i + 1;
+      // }
+      
       // benchmark insert
       long start = System.nanoTime();
-      for (int val : data)
+      for (int val : data) {
          tree.root = tree.insert(tree.root, val);
+      }
+         
       long end = System.nanoTime();
 
       System.out.println("=== Weight-Balanced AVL Tree Benchmark ===");
       System.out.println("Insert " + N + " nodes");
       System.out.println("Waktu : " + (end - start) / 1_000_000.0 + " ms");
       System.out.println("Rotasi: " + tree.rotationCount);
-      System.out.println("Tinggi: " + tree.size(tree.root));
+      System.out.println ("Tinggi: " + tree.height (tree.root));
 
       // benchmark search
       start = System.nanoTime();
-      for (int val : data)
+      for (int val : data){
          tree.search(tree.root, val);
+      }         
       end = System.nanoTime();
 
       System.out.println("\nSearch " + N + " nodes");
@@ -231,18 +197,21 @@ public class WeightBalancedAVLTree {
       // benchmark delete
       tree.rotationCount = 0;
       start = System.nanoTime();
-      for (int i = 0; i < N/2; i++)
+      for (int i = 0; i < N/2; i++){
+         
          tree.root = tree.deleteNode(tree.root, data[i]);
+      }
       end = System.nanoTime();
 
-      System.out.println("\nDelete" + N/2 + " nodes");
+      System.out.println("\nDelete " + N/2 + " nodes");
       System.out.println("Waktu : " + (end - start) / 1_000_000.0 + " ms");
       System.out.println("Rotasi: " + tree.rotationCount);
       System.out.println("Size  : " + tree.size(tree.root));
+      System.out.println ("Tinggi: " + tree.height (tree.root));
 
-      // print hasil akhir tree
-      System.out.print("\nWBT Tree: ");
-      tree.printTree(tree.root);
-      System.out.println();
+      // // print hasil akhir tree
+      // System.out.print("\nWBT Tree: ");
+      // tree.printTree(tree.root);
+      // System.out.println();
    }
 }
