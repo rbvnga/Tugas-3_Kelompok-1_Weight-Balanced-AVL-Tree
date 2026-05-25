@@ -1,7 +1,16 @@
 # Tugas-3_Kelompok-1_Weight-Balanced-AVL-Tree
-| Nama Anggota | Nrp |
+| Nama Anggota | NRP |
 | :---: | :---: |
-| Putri Permata Sabila | 5027251011 |
+| Putri Permata Sabila | 5027251047 |
+| :---: | :---: |
+| Revalinda Bunga Nayla Laksono | 5027251011 |
+| :---: | :---: |
+| Nathania Tiara Wahyudi | 5027251089 |
+| :---: | :---: |
+| Jude Athala Yazid Sari| 5027251098 |
+| :---: | :---: |
+| Muhammad Ridwan | 5027251113 |
+
 
 ## Problem Statement
 
