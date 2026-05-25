@@ -523,10 +523,10 @@ $$BF = |h(L) - h(R)| \leq 1$$
 Keseimbangan ditegakkan melalui 4 tipe rotasi setiap kali insert atau delete melanggar properti ini. Setiap node menyimpan satu metadata berupa **height**. Tinggi terburuk ≈ 1.44 log₂ n.
  
 **Mekanisme rotasi:**
-- **LL Rotation** — node berat di kiri-kiri
-- **RR Rotation** — node berat di kanan-kanan
-- **LR Rotation** — node berat di kiri-kanan
-- **RL Rotation** — node berat di kanan-kiri
+- **LL Rotation** = node berat di kiri-kiri
+- **RR Rotation** = node berat di kanan-kanan
+- **LR Rotation** = node berat di kiri-kanan
+- **RL Rotation** = node berat di kanan-kiri
 **Struktur node AVL (Java):**
 ```java
 class AVLNode {
@@ -579,9 +579,9 @@ class WBNode {
  
 ### 7.4 Perbedaan Kriteria Keseimbangan
  
-**AVL Tree** menggunakan selisih tinggi — pohon dianggap tidak seimbang jika satu sisi lebih tinggi satu level dari sisi lain. Ini sangat ketat, sehingga rotasi sering terpicu bahkan untuk ketidakseimbangan kecil.
+**AVL Tree** menggunakan selisih tinggi , pohon dianggap tidak seimbang jika satu sisi lebih tinggi satu level dari sisi lain. Ini sangat ketat, sehingga rotasi sering terpicu bahkan untuk ketidakseimbangan kecil.
  
-**WB-AVL** menggunakan proporsi berat — pohon dianggap tidak seimbang jika subtree kiri menyimpan terlalu sedikit atau terlalu banyak node dibanding total. Threshold α ≈ 0.29 memberi toleransi lebih besar, sehingga rotasi lebih jarang terpicu.
+**WB-AVL** menggunakan proporsi berat , pohon dianggap tidak seimbang jika subtree kiri menyimpan terlalu sedikit atau terlalu banyak node dibanding total. Threshold α ≈ 0.29 memberi toleransi lebih besar, sehingga rotasi lebih jarang terpicu.
  
 Contoh kasus di mana keduanya berbeda:
 ```
