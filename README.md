@@ -507,9 +507,44 @@ Hasil insert 7 node berurutan (1, 2, 3, 4, 5, 6, 7):
 
 Pada dataset kecil yang terurut, kedua tree menghasilkan struktur yang sama. Perbedaan mulai terlihat pada dataset besar dengan distribusi acak, di mana Weight-Balanced Tree cenderung menghasilkan lebih sedikit rotasi karena keputusan rotasinya didasarkan pada jumlah node, bukan hanya tinggi.
 
-## Keunggulan 
+## Aplikasi / Implementasi
 
-## Kekurangan 
+Dalam penerapannya di dunia nyata, karakteristik mekanika dari kedua struktur data ini membuat masing-masing memiliki kecocokan kasus yang berbeda:
+
+* **AVL Tree**
+  * **Sistem yang Sering Cari Data (*Read-Heavy*):** Karena aturan seleksi tingginya sangat ketat, bentuk *tree* dijamin bakal selalu simetris dan optimal. Ini cocok banget buat sistem pencarian kamus digital, indeks *database* konvensional, atau aplikasi direktori yang datanya jarang berubah (jarang ada *insert*/*delete*) tapi sangat sering diakses.
+  * **Sistem dengan Memori Terbatas:** Node pada AVL Tree cuma perlu menyimpan data integer kecil untuk `height`. Jadinya, struktur ini ramah buat perangkat *embedded system* yang memorinya terbatas.
+
+* **Weight-Balanced AVL Tree (WBT)**
+  * **Sistem yang Sering Modifikasi Data (*Write-Heavy*):** Sangat ideal dipakai pada sistem *log* berkas, *streaming data processing*, atau antrean transaksi keuangan yang frekuensi penambahan (*insert*) dan penghapusan (*delete*)-nya tinggi banget. Kelonggaran *balancing* pada WBT bikin proses tulis data gak gampang tersendat oleh rotasi.
+  * **Pustaka Bahasa Pemrograman Fungsional:** Seperti yang dijelaskan oleh Hirai & Yamamoto (2011), implementasi berbasis ukuran (*size*) ini dipakai secara luas di pustaka standar bahasa seperti Haskell (`Data.Set` dan `Data.Map`) karena parameter *size* memudahkan operasi gabungan (*union* / *intersection*) himpunan secara efisien.
+
+---
+
+## Keunggulan
+
+### AVL Tree
+* **Pencarian Lebih Konsisten:** Selisih tinggi sub-tree kiri dan kanan dipatok maksimal 1. Aturan ketat ini memastikan operasi `search` selalu berada di performa terbaiknya ( $O(\log n)$ ) pada kondisi terburuk sekalipun.
+* **Hemat Alokasi Memori per Node:** Atribut `height` memakan memori yang lebih sedikit dibanding harus menyimpan jumlah total node di bawahnya.
+* **Lebih Mudah Diprediksi:** Karakternya stabil karena konsepnya merupakan dasar struktur data penyeimbang otomatis yang paling matang di literatur ilmu komputer.
+
+### Weight-Balanced AVL Tree (WBT)
+* **Jumlah Rotasi Jauh Lebih Sedikit:** Ini poin paling unggul dari WBT. Dari hasil pengujian kelompok kami dengan 1000 data *insert*, WBT cuma butuh **101 rotasi**, sedangkan AVL harus melakukan sampai **990 rotasi** (hampir 10 kali lipatnya).
+* **Eksekusi *Write* Lebih Cepat:** Berkurangnya *overhead* untuk rotasi berdampak langsung ke *runtime*. Proses *insert* WBT cuma makan waktu **2.79 ms**, hampir setengah kali lebih cepat dari AVL yang butuh **4.74 ms**.
+* **Fungsi Tambahan Atribut Size:** Karena setiap node menyimpan data `size` (total node di bawahnya), kita bisa tahu ukuran sub-tree kapan saja atau mencari elemen ke-$k$ (*order statistics*) tanpa perlu melakukan *looping* atau *traversal* ulang dari awal.
+
+---
+
+## Kekurangan
+
+### AVL Tree
+* **Overhead Rotasi Tinggi saat Modifikasi Data:** Terlalu sensitif sama perubahan tinggi. Tiap kali ada proses *insert* atau *delete*, struktur *tree* sering kali terpaksa melakukan rotasi berantai demi menjaga syarat seimbang.
+* **Runtime *Insert* dan *Delete* Lebih Lambat:** Sesuai dengan data tes kelompok kami, proses *insert* memakan waktu **4.74 ms** karena komputer sibuk menghitung ulang *balance factor* dan memicu rotasi berulang kali.
+
+### Weight-Balanced AVL Tree (WBT)
+* **Bentuk Tree Cenderung Lebih Tinggi:** Karena kriteria keseimbangannya berdasarkan jumlah node (pakai parameter $\delta = 3$), toleransinya jadi agak longgar. Akibatnya bentuk *tree* bisa sedikit lebih tinggi atau condong. Hal ini terbukti dari tes kami di mana tinggi akhir WBT menyentuh angka **17**, sementara AVL stabil di angka **10**.
+* **Potensi Delay pada Dataset Masif:** Walaupun pada pengujian 1000 node waktu pencariannya tipis (**0.55 ms** vs **0.70 ms**), secara teori jika datanya membengkak sampai jutaan, *tree* yang lebih tinggi (tinggi 17 vs 10) bakal butuh proses lompatan pointer (*pointer hopping*) lebih banyak, sehingga pencarian bisa sedikit melambat dibanding AVL.
+* **Sangat Bergantung pada Akurasi Parameter:** Performa dan stabilitas WBT terkunci pada konstanta parameter $\delta$ dan $\gamma$. Sedikit saja salah menentukan batasan nilai ini, struktur pohonnya bisa langsung rusak atau kehilangan sifat seimbangnya.
 
 
 ## Perbandingan antara AVL Tree Dasar dengan Weight-Balanced AVL Tree
@@ -806,11 +841,9 @@ Menyusun ulang node di memori menggunakan layout **van Emde Boas** sehingga trav
 ## Hasil Implementasi
 
 **AVL Tree** 
-<br>
 <img width="254" height="339" alt="Screenshot 2026-05-25 122344" src="https://github.com/user-attachments/assets/cac44ba3-3a13-4f92-8287-321f1b22c5e8" /> <br>
 
 **Weight Balanced AVL Tree**
-<br>
 <img width="394" height="317" alt="Screenshot 2026-05-25 122418" src="https://github.com/user-attachments/assets/d1526513-100a-4baa-a353-36a79709426e" /> <br>
 
 
