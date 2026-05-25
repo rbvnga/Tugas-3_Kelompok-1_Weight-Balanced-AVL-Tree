@@ -20,3 +20,5 @@
 ## Perbandingan Performa 
 
 ## Referensi
+https://dspace.univ-ouargla.dz/jspui/handle/123456789/28658
+https://www.cambridge.org/core/journals/journal-of-functional-programming/article/balancing-weightbalanced-trees/7281C4DE7E56B74F2D13F06E31DCBC5B?utm_source=openai
