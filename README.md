@@ -511,11 +511,148 @@ Pada dataset kecil yang terurut, kedua tree menghasilkan struktur yang sama. Per
 
 ## Kekurangan 
 
+
 ## Perbandingan antara AVL Tree Dasar dengan Weight-Balanced AVL Tree
+
+### 7.1 AVL Tree (Dasar)
+ 
+AVL Tree adalah Binary Search Tree (BST) self-balancing yang menjaga **balance factor (BF)** di setiap node dengan syarat:
+ 
+$$BF = |h(L) - h(R)| \leq 1$$
+ 
+Keseimbangan ditegakkan melalui 4 tipe rotasi setiap kali insert atau delete melanggar properti ini. Setiap node menyimpan satu metadata berupa **height**. Tinggi terburuk ≈ 1.44 log₂ n.
+ 
+**Mekanisme rotasi:**
+- **LL Rotation** — node berat di kiri-kiri
+- **RR Rotation** — node berat di kanan-kanan
+- **LR Rotation** — node berat di kiri-kanan
+- **RL Rotation** — node berat di kanan-kiri
+**Struktur node AVL (Java):**
+```java
+class AVLNode {
+    int key;
+    int height;       // metadata: tinggi subtree
+    AVLNode left, right;
+}
+```
+ 
+---
+ 
+### 7.2 Weight-Balanced AVL Tree (WB-AVL)
+ 
+WB-AVL mengubah kriteria keseimbangan dari *height-based* menjadi **weight-based**. Keseimbangan dijaga dengan rasio berat subtree:
+ 
+$$\frac{size(L)}{size(T)} \in [\alpha,\ 1 - \alpha], \quad \alpha \approx 0.29$$
+ 
+di mana `size(T)` adalah jumlah total node di subtree T, dan `size(L)` adalah jumlah node di subtree kiri.
+ 
+Setiap node menyimpan **size** (jumlah node di subtree) sebagai pengganti height.
+ 
+**Struktur node WB-AVL (Java):**
+```java
+class WBNode {
+    int key;
+    int size;         // metadata: jumlah node di subtree ini
+    WBNode left, right;
+}
+```
+ 
+---
+ 
+### 7.3 Perbandingan Mendasar: AVL vs WB-AVL
+ 
+| Aspek | AVL Tree | WB-AVL Tree |
+|---|---|---|
+| **Kriteria keseimbangan** | `\|h(L) − h(R)\| ≤ 1` (height-based) | `size(L)/size(T) ∈ [α, 1−α]` (weight-based) |
+| **Metadata per node** | `height` (1 integer) | `size` (1 integer) |
+| **Tinggi terburuk** | ≈ 1.44 log₂ n | ≈ 1.29 log₂ n |
+| **Mekanisme rebalance** | Rotasi LL, RR, LR, RL | Single/double rotasi + update size |
+| **Frekuensi rotasi** | Tinggi (BF ±1 ketat) | Sedang (rasio lebih longgar) |
+| **Rank / Select** | O(n) tanpa augmentasi | **O(log n) native** |
+| **Order statistics** | Perlu augmentasi eksplisit | Sudah built-in dari size |
+| **Space per node** | O(1) overhead | O(1) overhead |
+| **Space total** | O(n) | O(n) |
+| **Kompleksitas implementasi** | Sedang | Sedang–Tinggi |
+| **Use case ideal** | General BST, read-heavy | Ranking engine, order statistics |
+ 
+---
+ 
+### 7.4 Perbedaan Kriteria Keseimbangan
+ 
+**AVL Tree** menggunakan selisih tinggi — pohon dianggap tidak seimbang jika satu sisi lebih tinggi satu level dari sisi lain. Ini sangat ketat, sehingga rotasi sering terpicu bahkan untuk ketidakseimbangan kecil.
+ 
+**WB-AVL** menggunakan proporsi berat — pohon dianggap tidak seimbang jika subtree kiri menyimpan terlalu sedikit atau terlalu banyak node dibanding total. Threshold α ≈ 0.29 memberi toleransi lebih besar, sehingga rotasi lebih jarang terpicu.
+ 
+Contoh kasus di mana keduanya berbeda:
+```
+Pohon berikut VALID di WB-AVL tapi TIDAK VALID di AVL:
+ 
+        10
+       /  \
+      5    15
+     / \
+    3   7
+   /
+  1
+ 
+AVL  : BF(10) = h(kiri)=3, h(kanan)=1 → |3-1|=2 > 1 → PERLU ROTASI
+WB-AVL: size(kiri)=4, size(T)=6 → 4/6=0.67 → masih dalam [0.29, 0.71] → VALID
+```
+ 
+---
+ 
+### 7.5 Perbedaan Tinggi Pohon
+ 
+AVL Tree menjamin tinggi maksimum berdasarkan sifat Fibonacci tree:
+ 
+$$h_{AVL} \leq 1.44 \log_2(n + 2)$$
+ 
+WB-AVL menjamin tinggi lebih pendek karena distribusi node lebih merata secara berat:
+ 
+$$h_{WB} \leq \log_{1/\alpha}(n) \approx 1.29 \log_2 n \quad (\alpha \approx 0.29)$$
+ 
+Pohon yang lebih pendek berarti operasi search rata-rata memerlukan lebih sedikit perbandingan.
+ 
+---
+ 
+### 7.6 Keunggulan Kritis WB-AVL: Rank dan Select Native
+ 
+Karena setiap node menyimpan `size`, operasi **rank** (cari posisi ke-k dari terkecil) dan **select** (cari elemen ke-k) dapat dilakukan dalam O(log n) tanpa augmentasi tambahan:
+ 
+```java
+// Rank: posisi key dalam urutan terurut
+int rank(WBNode node, int key) {
+    if (node == null) return 0;
+    if (key == node.key) return size(node.left) + 1;
+    if (key < node.key)  return rank(node.left, key);
+    else                 return size(node.left) + 1 + rank(node.right, key);
+}
+ 
+// Select: elemen ke-k terkecil
+WBNode select(WBNode node, int k) {
+    int leftSize = size(node.left) + 1;
+    if (k == leftSize) return node;
+    if (k < leftSize)  return select(node.left, k);
+    else               return select(node.right, k - leftSize);
+}
+// Keduanya T(n) = T(n/2) + O(1) → O(log n)
+```
+ 
+Pada AVL Tree biasa, operasi yang sama memerlukan traversal seluruh pohon O(n) , kecuali ditambahkan field `size` secara eksplisit (augmentasi manual).
+ 
+---
+ 
+### 7.7 Kesimpulan Perbandingan Teori
+ 
+WB-AVL bukan sekadar "AVL yang dimodifikasi sedikit", ia mengubah **filosofi keseimbangan** dari tinggi ke berat. Ini menghasilkan pohon yang secara statistik lebih merata distribusinya, lebih pendek, dan secara native mendukung operasi order-statistics. Trade-off-nya adalah implementasi yang sedikit lebih kompleks dan pohon yang secara tinggi bisa sedikit lebih tidak merata dibanding AVL klasik.
+ 
+---
 
 ## Analisis Kompleksitas Berdasarkan Struktur Tree
 
 ## Potensi Pengembangan 
+
+
 
 ## Hasil Implementasi
 
