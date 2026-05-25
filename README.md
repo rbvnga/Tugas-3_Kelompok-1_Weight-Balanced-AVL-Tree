@@ -311,6 +311,202 @@ boolean search(WBTNode node, int key) {
 
 ## Diagram dan Visualisasi
 
+### 1. Rotasi AVL Tree
+
+#### Left-Left (LL) — Right Rotate
+
+Terjadi ketika node baru masuk ke subtree kiri-kiri sehingga balance factor > 1.
+
+```
+Sebelum:          Sesudah:
+    z                 y
+   / \               / \
+  y   C             x   z
+ / \        →      / \ / \
+x   B             A  B B  C
+```
+
+#### Right-Right (RR) — Left Rotate
+
+Terjadi ketika node baru masuk ke subtree kanan-kanan sehingga balance factor < -1.
+
+```
+Sebelum:          Sesudah:
+  x                   y
+ / \                 / \
+A   y               x   z
+   / \      →      / \ / \
+  B   z            A  B B  C
+```
+
+#### Left-Right (LR) — Left Rotate lalu Right Rotate
+
+Terjadi ketika node baru masuk ke subtree kiri-kanan.
+
+```
+Langkah 1 (Left Rotate pada y):
+
+    z                 z
+   / \               / \
+  y   D             x   D
+ / \       →       / \
+A   x             y   C
+   / \           / \
+  B   C         A   B
+
+Langkah 2 (Right Rotate pada z):
+
+    z                 x
+   / \               / \
+  x   D             y   z
+ / \       →       / \ / \
+y   C             A  B C  D
+```
+
+#### Right-Left (RL) — Right Rotate lalu Left Rotate
+
+Terjadi ketika node baru masuk ke subtree kanan-kiri.
+
+```
+Langkah 1 (Right Rotate pada y):
+
+  z                 z
+ / \               / \
+A   y             A   x
+   / \    →          / \
+  x   D             B   y
+ / \                   / \
+B   C                 C   D
+
+Langkah 2 (Left Rotate pada z):
+
+  z                 x
+ / \               / \
+A   x             z   y
+   / \    →      / \ / \
+  B   y         A  B C  D
+```
+
+---
+
+### 2. Mekanisme balanceLeft dan balanceRight
+
+#### Single Rotation (isSingle = true)
+
+Terjadi ketika subtree dalam (r.left) lebih kecil dari subtree luar (r.right).
+
+```
+Sebelum balanceLeft:        Sesudah rotateLeft:
+
+   [key]                        [r]
+   /    \                      /   \
+ [l]    [r]       →         [key]  [r.R]
+        /  \                /   \
+      r.L  r.R            [l]  [r.L]
+```
+
+#### Double Rotation (isSingle = false)
+
+Terjadi ketika subtree dalam (r.left) lebih besar dari subtree luar (r.right).
+
+```
+Langkah 1 (rotateRight pada r):    Langkah 2 (rotateLeft pada node):
+
+   [key]                [key]                  [r.L]
+   /    \               /    \                /      \
+ [l]    [r]    →     [l]    [r.L]    →     [key]     [r]
+        /  \                   \            /   \    /  \
+      r.L  r.R                 [r]        [l] r.L.L r.L.R r.R
+      /  \                    /  \
+   r.L.L r.L.R            r.L.R  r.R
+```
+
+---
+
+### 3. Contoh Insert pada AVL Tree
+
+Insert berurutan: 10, 20, 30
+
+```
+Insert 10:        Insert 20:        Insert 30 (RR case):
+   10                10                  10
+                      \                    \          →    rotasi kiri
+                      20                  20
+                                            \
+                                            30
+
+Sesudah rotasi:
+      20
+     /  \
+   10    30
+```
+
+Insert berurutan: 30, 20, 10
+
+```
+Insert 30:        Insert 20:        Insert 10 (LL case):
+   30                30                  30
+                    /                   /           →    rotasi kanan
+                   20                  20
+                                      /
+                                     10
+
+Sesudah rotasi:
+      20
+     /  \
+   10    30
+```
+
+---
+
+### 4. Contoh Insert pada Weight-Balanced AVL Tree
+
+Insert berurutan: 1, 2, 3, 4, 5 (δ=3, γ=2)
+
+```
+Insert 1:    Insert 2:    Insert 3:       Insert 4:        Insert 5:
+   1            1            1               2                 2
+                 \            \             / \               / \
+                  2            2           1   3             1   3
+                                \                 \               \
+                                 3                 4               4
+                                                                     \
+                                                                      5
+
+Sesudah balanceLeft pada insert 5 (single rotation):
+        2
+       / \
+      1   4
+         / \
+        3   5
+```
+
+---
+
+### 5. Perbandingan Struktur Tree
+
+Hasil insert 7 node berurutan (1, 2, 3, 4, 5, 6, 7):
+
+**AVL Tree** — keseimbangan dijaga berdasarkan tinggi:
+```
+        4
+       / \
+      2   6
+     / \ / \
+    1  3 5  7
+```
+
+**Weight-Balanced AVL Tree** — keseimbangan dijaga berdasarkan jumlah node:
+```
+        4
+       / \
+      2   6
+     / \ / \
+    1  3 5  7
+```
+
+Pada dataset kecil yang terurut, kedua tree menghasilkan struktur yang sama. Perbedaan mulai terlihat pada dataset besar dengan distribusi acak, di mana Weight-Balanced Tree cenderung menghasilkan lebih sedikit rotasi karena keputusan rotasinya didasarkan pada jumlah node, bukan hanya tinggi.
+
 ## Keunggulan 
 
 ## Kekurangan 
