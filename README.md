@@ -650,6 +650,105 @@ WB-AVL bukan sekadar "AVL yang dimodifikasi sedikit", ia mengubah **filosofi kes
 
 ## Analisis Kompleksitas Berdasarkan Struktur Tree
 
+### 8.1 Kompleksitas Waktu AVL Tree
+ 
+Jaminan tinggi pohon ≤ 1.44 log₂ n berasal dari sifat Fibonacci tree sebagai kasus terburuk AVL. Semua operasi utama berjalan dalam O(log n):
+ 
+| Operasi | Best Case | Average Case | Worst Case |
+|---|:---:|:---:|:---:|
+| Search | O(1) | O(log n) | O(log n) |
+| Insert | O(log n) | O(log n) | O(log n) |
+| Delete | O(log n) | O(log n) | O(log n) |
+| Rank / Select | O(1) | O(n) | O(n) |
+| Rotasi per insert | O(1) | O(1) amortized | O(log n) |
+| Space | — | O(n) | O(n) |
+ 
+**Analisis rotasi insert:**
+Setiap insert memerlukan paling banyak **2 rotasi** (untuk double rotation LR/RL). Namun traversal bottom-up untuk update BF sepanjang jalur ke root tetap O(log n). Dalam n operasi insert berurutan, rata-rata terjadi ~1 rotasi per insert.
+ 
+**Analisis rotasi delete:**
+Delete lebih mahal dari insert pada AVL , rotasi bisa terjadi di setiap level jalur ke root (O(log n) rotasi dalam satu operasi delete, bukan O(1)).
+ 
+---
+ 
+### 8.2 Kompleksitas Waktu WB-AVL Tree
+ 
+Tinggi pohon dijamin oleh weight ratio α:
+ 
+$$h_{WB} \leq \log_{1/\alpha}(n) \approx 1.29 \log_2 n \quad (\alpha \approx 0.29)$$
+ 
+| Operasi | Best Case | Average Case | Worst Case |
+|---|:---:|:---:|:---:|
+| Search | O(1) | O(log n) | O(log n) |
+| Insert | O(log n) | O(log n) | O(log n) |
+| Delete | O(log n) | O(log n) | O(log n) |
+| **Rank** | O(1) | **O(log n)** | **O(log n)** |
+| **Select** | O(1) | **O(log n)** | **O(log n)** |
+| Update `size` saat insert/delete | O(log n) | O(log n) | O(log n) |
+| Space | — | O(n) | O(n) |
+ 
+**Analisis update size:**
+Setiap insert/delete meng-update `size` di semua ancestor node sepanjang jalur dari leaf ke root → O(log n). Ini tidak menambah kompleksitas asimptotik karena traversal tersebut memang sudah dilakukan untuk rebalancing.
+ 
+**Analisis frekuensi rotasi dibanding AVL:**
+```
+Untuk n operasi insert berurutan:
+ 
+AVL Tree : ~1.0 rotasi/insert  → n rotasi total
+WB-AVL   : ~0.5 rotasi/insert  → n/2 rotasi total
+ 
+WB-AVL melakukan rotasi ≈ 2× lebih jarang secara amortized,
+karena threshold berbasis rasio lebih toleran terhadap
+distribusi asimetris kecil.
+```
+ 
+---
+ 
+### 8.3 Perbandingan Kompleksitas AVL vs WB-AVL
+ 
+| Operasi | AVL Tree | WB-AVL Tree | Keterangan |
+|---|:---:|:---:|---|
+| Search | O(log n) | O(log n) | WB-AVL konstan lebih kecil (pohon lebih pendek) |
+| Insert | O(log n) | O(log n) | WB-AVL rotasi lebih jarang |
+| Delete | O(log n) | O(log n) | Setara, WB-AVL update size O(log n) |
+| Rank | **O(n)** | **O(log n)** | Keunggulan utama WB-AVL |
+| Select | **O(n)** | **O(log n)** | Keunggulan utama WB-AVL |
+| Space | O(n) | O(n) | Setara (size menggantikan height) |
+| Tinggi pohon | 1.44 log₂ n | 1.29 log₂ n | WB-AVL ~10% lebih pendek |
+| Rotasi/insert | ~1.0× | ~0.5× | WB-AVL 2× lebih efisien |
+ 
+---
+ 
+### 8.4 Analisis Kompleksitas Rotasi (Amortized)
+ 
+Dalam sequence n operasi campuran insert dan delete:
+ 
+**AVL Tree:**
+- Insert: amortized O(1) rotasi, total traversal O(log n)
+- Delete: bisa O(log n) rotasi dalam satu operasi (berbeda dari insert)
+- Total rotasi untuk n operasi: O(n log n) pada workload delete-heavy
+**WB-AVL Tree:**
+- Insert: amortized O(1) rotasi, lebih jarang dari AVL
+- Delete: amortized O(log n), mirip insert karena threshold berbasis rasio
+- Total rotasi untuk n operasi: O(n) pada workload seimbang
+---
+ 
+### 8.5 Kompleksitas Ruang (Space Complexity)
+ 
+Kedua tree memiliki space complexity O(n). Perbedaannya hanya pada field yang disimpan per node:
+ 
+| | AVL Node | WB-AVL Node |
+|---|---|---|
+| `key` | ✅ | ✅ |
+| `left`, `right` | ✅ | ✅ |
+| `height` | ✅ | ❌ (diganti size) |
+| `size` | ❌ | ✅ |
+| **Total per node** | **4 field** | **4 field** |
+ 
+Tidak ada overhead memori tambahan , WB-AVL hanya mengganti `height` dengan `size`, bukan menambahkan field baru.
+ 
+---
+
 ## Potensi Pengembangan 
 
 
