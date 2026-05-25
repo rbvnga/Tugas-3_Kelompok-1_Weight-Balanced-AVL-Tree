@@ -1,4 +1,8 @@
 # Tugas-3_Kelompok-1_Weight-Balanced-AVL-Tree
+| Nama Anggota | Nrp |
+| :---: | :---: |
+| Putri Permata Sabila | 5027251011 |
+
 ## Problem Statement
 
 ## Struktur Tree dan Algoritma
