@@ -739,10 +739,10 @@ Kedua tree memiliki space complexity O(n). Perbedaannya hanya pada field yang di
  
 | | AVL Node | WB-AVL Node |
 |---|---|---|
-| `key` | ✅ | ✅ |
-| `left`, `right` | ✅ | ✅ |
-| `height` | ✅ | ❌ (diganti size) |
-| `size` | ❌ | ✅ |
+| `key` | yes | yes |
+| `left`, `right` | yes | yes |
+| `height` | yes | no (diganti size) |
+| `size` | no | yes |
 | **Total per node** | **4 field** | **4 field** |
  
 Tidak ada overhead memori tambahan , WB-AVL hanya mengganti `height` dengan `size`, bukan menambahkan field baru.
@@ -751,7 +751,57 @@ Tidak ada overhead memori tambahan , WB-AVL hanya mengganti `height` dengan `siz
 
 ## Potensi Pengembangan 
 
-
+### 9.1 Pengembangan AVL Tree
+ 
+#### 9.1.1 Persistent AVL Tree
+AVL Tree dapat dikembangkan menjadi **persistent data structure** menggunakan teknik *path copying*: setiap modifikasi menghasilkan versi baru pohon tanpa menghapus versi lama.
+ 
+```
+v1 (root A) → insert(X) → v2 (root A')
+                         → v1 tetap bisa diakses
+```
+ 
+Manfaat:
+- Database dengan **time-travel query** ("tampilkan data per tanggal X")
+- Sistem **undo/redo** pada editor teks atau software desain
+- Functional programming yang menghindari mutation
+Kompleksitas: O(log n) per operasi, O(log n) space tambahan per versi.
+ 
+#### 9.1.2 Concurrent / Lock-free AVL Tree
+AVL Tree standar tidak aman untuk multi-thread karena rotasi mengubah banyak pointer sekaligus. Pengembangan ke depan:
+- **Fine-grained locking**: lock hanya node yang sedang dimodifikasi, bukan seluruh tree
+- **Lock-free AVL**: menggunakan operasi CAS (Compare-And-Swap) atomic
+- Relevan untuk **in-memory database multi-core** dan sistem real-time
+---
+ 
+### 9.2 Pengembangan WB-AVL Tree
+ 
+#### 9.2.1 Persistent WB-AVL Tree
+Karena WB-AVL sudah menyimpan `size` di setiap node, persistent version-nya memiliki keunggulan tambahan: setiap snapshot versi juga mendukung **rank/select O(log n)** secara langsung. Ini digunakan pada **persistent order-statistics tree** untuk analisis data historis , misalnya "siapa yang berada di peringkat ke-100 pada tanggal X?"
+ 
+#### 9.2.2 Adaptive Alpha (α Dinamis)
+Nilai α pada WB-AVL saat ini bersifat statis (≈ 0.29). Pengembangan ke depan: **adaptive α** yang berubah dinamis berdasarkan pola workload:
+- Jika workload sedang **write-heavy** → naikkan α sedikit (kurangi frekuensi rotasi)
+- Jika workload bergeser ke **read-heavy** → turunkan α (perbaiki balance, pohon lebih pendek)
+Hasilnya adalah WB-AVL yang **self-tuning** tanpa konfigurasi manual.
+ 
+---
+ 
+### 9.3 Pengembangan Gabungan (AVL + WB-AVL)
+ 
+#### 9.3.1 Tiered Index Structure
+Menggabungkan AVL Tree dan WB-AVL dalam arsitektur bertingkat:
+```
+Layer 1 (hot data)  : AVL Tree di L1/L2 cache — prioritas kecepatan search
+Layer 2 (warm data) : WB-AVL di DRAM — prioritas rank/select dan throughput
+Layer 3 (cold data) : M-way variant di disk — prioritas kapasitas
+```
+Data panas (sering diakses) naik ke layer lebih atas secara otomatis → arsitektur ini digunakan pada **database buffer pool** modern.
+ 
+#### 9.3.2 Cache-Oblivious Layout
+Menyusun ulang node di memori menggunakan layout **van Emde Boas** sehingga traversal pohon menghasilkan cache miss minimal tanpa perlu mengetahui cache size secara eksplisit. Karena WB-AVL pohonnya lebih pendek, manfaat cache-oblivious layout lebih terasa dibanding AVL biasa.
+ 
+---
 
 ## Hasil Implementasi
 
