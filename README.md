@@ -520,10 +520,10 @@ Pada dataset kecil yang terurut, kedua tree menghasilkan struktur yang sama. Per
 ## Hasil Implementasi
 
 **AVL Tree** 
-<img width="254" height="339" alt="Screenshot 2026-05-25 122344" src="https://github.com/user-attachments/assets/cac44ba3-3a13-4f92-8287-321f1b22c5e8" />
+<img width="254" height="339" alt="Screenshot 2026-05-25 122344" src="https://github.com/user-attachments/assets/cac44ba3-3a13-4f92-8287-321f1b22c5e8" /> <br>
 
 **Weight Balanced AVL Tree**
-<img width="394" height="317" alt="Screenshot 2026-05-25 122418" src="https://github.com/user-attachments/assets/d1526513-100a-4baa-a353-36a79709426e" />
+<img width="394" height="317" alt="Screenshot 2026-05-25 122418" src="https://github.com/user-attachments/assets/d1526513-100a-4baa-a353-36a79709426e" /> <br>
 
 
 ## Perbandingan Performa 
